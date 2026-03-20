@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How To Use 'Build' Sets</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.png" type="image/png">
+  <style>
+  @font-face {
+    font-family: 'Varet Gothic';
+    src: url('VaretGothic-BoldItalic.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-dark: #222323;
+    --bg-section: #2c2d2d;
+    --bg-card: #353636;
+    --gold: #ffcd68;
+    --gold-mid: #BF994C;
+    --text: #e8e8e8;
+    --text-muted: #a0a0a0;
+    --yellow: #ffcd68;
+    --red: #ff6b6b;
+    --blue: #6ba3ff;
+    --green: #6bffb0;
+    --purple: #c78dff;
+    --max-w: 680px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+    font-size: 16px;
+  }
+
+  /* ── Progress bar ── */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: var(--gold-mid);
+    width: 0%;
+    z-index: 100;
+    transition: width 0.15s ease;
+  }
+
+  /* ── Nav dots ── */
+  .side-nav {
+    position: fixed;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+  }
+  .side-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #464646;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    padding: 0;
+  }
+  .side-dot.active {
+    background: var(--gold-mid);
+    transform: scale(1.3);
+  }
+  .side-dot:hover { background: var(--gold); }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 60%, rgba(191,153,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 30%, rgba(191,153,76,0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-icon {
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+  .hero h1 {
+    font-family: 'Varet Gothic', sans-serif;
+    font-style: italic;
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    max-width: var(--max-w);
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+  .hero p {
+    max-width: 500px;
+    color: var(--text-muted);
+    font-size: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+  .scroll-hint {
+    margin-top: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+  .scroll-hint span {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .scroll-arrow {
+    display: inline-block;
+    animation: bounce 2s infinite;
+    font-size: 1.5rem;
+  }
+
+  /* ── Sections ── */
+  .section {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 1.5rem;
+    position: relative;
+  }
+  .section:nth-child(odd) { background: var(--bg-dark); }
+  .section:nth-child(even) { background: var(--bg-section); }
+
+  .section-inner {
+    max-width: var(--max-w);
+    width: 100%;
+  }
+
+  /* ── Section headers ── */
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid;
+    font-weight: 700;
+  }
+  .section-label .label-emoji { font-size: 1rem; }
+
+  .section-title {
+    font-family: 'Varet Gothic', sans-serif;
+    font-style: italic;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-subtitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .section-body p {
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  /* ── Color themes per section ── */
+  .theme-yellow .section-label { color: var(--yellow); border-color: rgba(255,205,104,0.3); background: rgba(255,205,104,0.08); }
+  .theme-yellow .section-title { color: var(--yellow); }
+
+  .theme-red .section-label { color: var(--red); border-color: rgba(255,107,107,0.3); background: rgba(255,107,107,0.08); }
+  .theme-red .section-title { color: var(--red); }
+
+  .theme-blue .section-label { color: var(--blue); border-color: rgba(107,163,255,0.3); background: rgba(107,163,255,0.08); }
+  .theme-blue .section-title { color: var(--blue); }
+
+  .theme-green .section-label { color: var(--green); border-color: rgba(107,255,176,0.3); background: rgba(107,255,176,0.08); }
+  .theme-green .section-title { color: var(--green); }
+
+  .theme-purple .section-label { color: var(--purple); border-color: rgba(199,141,255,0.3); background: rgba(199,141,255,0.08); }
+  .theme-purple .section-title { color: var(--purple); }
+
+  /* Placeholder variables (X, Y, Z) in titles */
+  .accent {
+    color: #fff !important;
+    background: rgba(255,255,255,0.1);
+    padding: 0.05em 0.3em;
+    border-radius: 4px;
+    border-bottom: 2px dotted rgba(255,255,255,0.4);
+  }
+
+  /* ── Example cards ── */
+  .examples-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+  @media (max-width: 600px) {
+    .examples-grid { grid-template-columns: 1fr; }
+  }
+  .example-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border-left: 3px solid;
+    position: relative;
+  }
+  .example-card .example-label {
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  .example-card .set-line {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    padding-left: 0.25rem;
+  }
+  .example-card .set-line.highlight {
+    color: #fff;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    margin-left: -0.25rem;
+    display: inline-block;
+  }
+  .example-card .set-line.working {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .theme-yellow .example-card { border-left-color: var(--yellow); }
+  .theme-yellow .example-card .example-label { color: var(--yellow); }
+  .theme-yellow .set-line.highlight { background: rgba(255,205,104,0.15); }
+
+  .theme-red .example-card { border-left-color: var(--red); }
+  .theme-red .example-card .example-label { color: var(--red); }
+  .theme-red .set-line.highlight { background: rgba(255,107,107,0.15); }
+
+  .theme-blue .example-card { border-left-color: var(--blue); }
+  .theme-blue .example-card .example-label { color: var(--blue); }
+  .theme-blue .set-line.highlight { background: rgba(107,163,255,0.15); }
+
+  .theme-green .example-card { border-left-color: var(--green); }
+  .theme-green .example-card .example-label { color: var(--green); }
+  .theme-green .set-line.highlight { background: rgba(107,255,176,0.15); }
+
+  .theme-purple .example-card { border-left-color: var(--purple); }
+  .theme-purple .example-card .example-label { color: var(--purple); }
+  .theme-purple .set-line.highlight { background: rgba(199,141,255,0.15); }
+
+  /* ── Tip callout ── */
+  .tip {
+    margin-top: 1.25rem;
+    padding: 0.85rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.5;
+    display: flex;
+    gap: 0.5rem;
+  }
+  .tip .tip-icon { flex-shrink: 0; }
+
+  .theme-yellow .tip { background: rgba(255,205,104,0.08); color: var(--yellow); }
+  .theme-red .tip { background: rgba(255,107,107,0.08); color: var(--red); }
+  .theme-blue .tip { background: rgba(107,163,255,0.08); color: var(--blue); }
+  .theme-green .tip { background: rgba(107,255,176,0.08); color: var(--green); }
+  .theme-purple .tip { background: rgba(199,141,255,0.08); color: var(--purple); }
+
+  /* ── Diagram placeholder ── */
+  .diagram-placeholder {
+    width: 100%;
+    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px dashed #555;
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 1.25rem 0;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--bg-section);
+  }
+  .footer h2 {
+    font-family: 'Varet Gothic', sans-serif;
+    font-style: italic;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    line-height: 1.15;
+    margin-bottom: 1rem;
+    max-width: var(--max-w);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .footer p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    max-width: var(--max-w);
+    margin: 0 auto;
+  }
+  .pill-button {
+    display: inline-block;
+    padding: 0.6rem 1.5rem;
+    border-radius: 999px;
+    background-color: var(--gold-mid);
+    color: var(--bg-dark);
+    font-weight: bold;
+    text-decoration: none;
+    margin-top: 1.5rem;
+    transition: background 0.2s;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  .pill-button:hover { background-color: var(--gold); }
+
+  /* ── Scroll animations ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(20px); }
+  }
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(8px); }
+    60% { transform: translateY(4px); }
+  }
+
+  /* ── Back to top ── */
+  .back-to-top {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--gold-mid);
+    color: var(--bg-dark);
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    letter-spacing: 0.05em;
+  }
+  .back-to-top.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .back-to-top:hover { background: var(--gold); }
+
+  /* ── Mobile tweaks ── */
+  @media (max-width: 600px) {
+    .side-nav { display: none; }
+    .section { padding: 3rem 1.25rem; min-height: auto; }
+    .hero { min-height: 90vh; }
+  }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Side navigation dots -->
+  <nav class="side-nav" id="sideNav"></nav>
+
+  <!-- Back to top -->
+  <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ TOP</button>
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section class="hero" id="sec-hero">
+    <div class="hero-icon" style="font-size:3.5rem;letter-spacing:0.15em;">🛠️ 🏗️ 🧱</div>
+    <h1>How To Use 'Build' Sets</h1>
+    <p>A quick reference guide to understanding build sets in your programming — what they mean, and how to execute them.</p>
+    <div class="scroll-hint">
+      <span>Scroll to explore</span>
+      <div class="scroll-arrow">⬇️</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SECTION 1 — Build to X reps ═══════════════ -->
+  <section class="section theme-yellow" id="sec-1">
+    <div class="section-inner reveal">
+      <div class="section-label"><span class="label-emoji">⚒️</span> Type 1</div>
+      <h2 class="section-title">Build to <span class="accent">X</span> reps @ <span class="accent">Y</span> RPE/RIR</h2>
+
+      <div class="section-body">
+        <p class="section-subtitle" style="color:var(--text);">Means ⤵️</p>
+        <p>Start with a familiar weight you know you can do in set 1, then slowly increase it for each set, until you <strong style="color:#fff;">hit a top weight in the last set that is programmed.</strong></p>
+
+        <!-- Optional: add a diagram image here -->
+        <!-- <img src="images/build-to-x-diagram.png" alt="build to x diagram" class="diagram-placeholder" style="border:none;padding:0;"> -->
+
+        <p class="section-subtitle" style="color:var(--text);">Examples ⤵️</p>
+      </div>
+
+      <div class="examples-grid">
+        <div class="example-card">
+          <div class="example-label">"Build to 8 reps @ RPE 9 for Bench Press"</div>
+          <div class="set-line">Build: Set 1 — 5kg × 8 Reps</div>
+          <div class="set-line">Build: Set 2 — 7.5kg × 8 Reps</div>
+          <div class="set-line">Build: Set 3 — 10kg × 8 Reps</div>
+          <div class="set-line highlight">Final Top Set: 15kg × 8 Reps</div>
+        </div>
+        <div class="example-card">
+          <div class="example-label">"Build to 8 reps @ 2 RIR for Back Squat"</div>
+          <div class="set-line">Build: Set 1 — 30kg × 8</div>
+          <div class="set-line">Build: Set 2 — 40kg × 8</div>
+          <div class="set-line">Build: Set 3 — 50kg × 8</div>
+          <div class="set-line">Build: Set 4 — 60kg × 8</div>
+          <div class="set-line highlight">Final Top Set: 70kg × 8</div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>If you get to that top set and realise you underestimated and feel like you can go heavier — feel free to add on another set if you have time until you reach the right intensity, OR make a note in the workout comments that next time you'll go heavier.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SECTION 2 — Build quickly ═══════════════ -->
+  <section class="section theme-red" id="sec-2">
+    <div class="section-inner reveal">
+      <div class="section-label"><span class="label-emoji">💨</span> Type 2</div>
+      <h2 class="section-title">Build quickly then hit <span class="accent">X</span> reps @ <span class="accent">Y</span>kg</h2>
+
+      <div class="section-body">
+        <p class="section-subtitle" style="color:var(--text);">Means ⤵️</p>
+        <p>Before your working sets, ensure you <strong style="color:#fff;">build up the weight gradually</strong> so you aren't going into something heavy without a few warm-up sets (add these on yourself in Everfit and use as many sets as needed).</p>
+        <p>For reps, select something you can easily do that is a little <strong style="color:#fff;">higher</strong> than your <strong style="color:#fff;">working sets</strong> that <strong style="color:#fff;">slowly decreases</strong> until you hit the working weight that is programmed.</p>
+        <p>For warm-up sets we don't need to rest as much as they are easy working sets, so just rest as needed until you start your prescribed working sets.</p>
+
+        <p class="section-subtitle" style="color:var(--text);">Examples ⤵️</p>
+      </div>
+
+      <div class="examples-grid">
+        <div class="example-card">
+          <div class="example-label">"Build quickly then hit 3 top sets of Bench Press @ 35kg"</div>
+          <div class="set-line">Build Set 1: 20kg × 10</div>
+          <div class="set-line">Build Set 2: 30kg × 8</div>
+          <div class="set-line working">Working Set 1: 35kg × 5</div>
+          <div class="set-line working">Working Set 2: 35kg × 5</div>
+          <div class="set-line working">Working Set 3: 35kg × 5</div>
+        </div>
+        <div class="example-card">
+          <div class="example-label">"Build quickly then hit 4 top sets of Deadlifts @ 110kg"</div>
+          <div class="set-line">Build Set 1: 60kg × 8</div>
+          <div class="set-line">Build Set 2: 80kg × 6</div>
+          <div class="set-line">Build Set 3: 100kg × 4</div>
+          <div class="set-line working">Working Set 1: 110kg × 3</div>
+          <div class="set-line working">Working Set 2: 110kg × 3</div>
+          <div class="set-line working">Working Set 3: 110kg × 3</div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>As you get stronger, your starting weight for your warm-up sets will be heavier — similar to your warm-up movements.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SECTION 3 — Build to X then hit sets ═══════════════ -->
+  <section class="section theme-blue" id="sec-3">
+    <div class="section-inner reveal">
+      <div class="section-label"><span class="label-emoji">🎯</span> Type 3</div>
+      <h2 class="section-title">Build to a <span class="accent">X</span> RPE/RIR/RM<sup style="font-size:0.45em;vertical-align:super;opacity:0.7;font-style:italic;font-family:'Lato',sans-serif;font-weight:700;">(Rep Max)</sup> Then hit <span class="accent">X</span> sets of <span class="accent">Y</span> reps @ that weight</h2>
+
+      <div class="section-body">
+        <p class="section-subtitle" style="color:var(--text);">Means ⤵️</p>
+        <p>Use as many sets as you need to build to something specific. This might be a specific <strong style="color:#fff;">RPE / RIR</strong> or a <strong style="color:#fff;">'rep max'</strong> (i.e. a 1RM, 3RM and so on).</p>
+        <p>Then once you've found that weight, do the programmed number of sets and reps at that specific weight.</p>
+        <p>For the build, <strong style="color:#fff;">use the amount of reps for the working sets.</strong> After each one, note the intensity — is that your 3RM? 8 RPE? 2 RIR? Or can you go heavier?</p>
+        <p>Rest as needed for the warm-up sets.</p>
+
+        <p class="section-subtitle" style="color:var(--text);">Examples ⤵️</p>
+      </div>
+
+      <div class="examples-grid">
+        <div class="example-card">
+          <div class="example-label">"Build to 8 RPE for Leg Press then hit 5 sets of 5 reps at that weight"</div>
+          <div class="set-line">Build Set 1: 70kg × 5</div>
+          <div class="set-line">Build Set 2: 90kg × 5</div>
+          <div class="set-line">Build Set 3: 110kg × 5</div>
+          <div class="set-line highlight">Build Set 4: 120kg × 5 ⬅️ RPE 7-8</div>
+          <div class="set-line working">Working Set 1: 125kg × 5</div>
+          <div class="set-line working">Working Set 2: 125kg × 5</div>
+          <div class="set-line working">Working Set 3: 125kg × 5</div>
+          <div class="set-line working">Working Set 4: 125kg × 5</div>
+          <div class="set-line working">Working Set 5: 125kg × 5</div>
+        </div>
+        <div class="example-card">
+          <div class="example-label">"Build to a 3RM Strict Press, then hit 4 sets of 3 reps at that weight"</div>
+          <div class="set-line">Build Set 1: 15kg × 3</div>
+          <div class="set-line">Build Set 2: 17.5kg × 3</div>
+          <div class="set-line">Build Set 3: 20kg × 3</div>
+          <div class="set-line highlight">Build Set 4: 22.5kg × 3 ⬅️ Close to failure</div>
+          <div class="set-line working">Working Set 1: 25kg × 3</div>
+          <div class="set-line working">Working Set 2: 25kg × 3</div>
+          <div class="set-line working">Working Set 3: 25kg × 3</div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>If you do a lift that is CLOSE to the right intensity, you don't have to do another build set — you can probably assume your working sets will be slightly heavier and go straight in.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SECTION 4 — Build to a XRM ═══════════════ -->
+  <section class="section theme-green" id="sec-4">
+    <div class="section-inner reveal">
+      <div class="section-label"><span class="label-emoji">🥵</span> Type 4</div>
+      <h2 class="section-title">Build to a <span class="accent">X</span>RM</h2>
+
+      <div class="section-body">
+        <p class="section-subtitle" style="color:var(--text);">Means ⤵️</p>
+        <p>Use as many sets as you need to build to a max amount of reps — i.e. 3RM, 1RM, 8RM and so on.</p>
+        <p>For reps: choose a starting point a little higher than what is programmed so you have time to warm up your lifts — but make sure you don't do too much and fatigue yourself before the top set.</p>
+        <p>Rest as you need to between each set.</p>
+        <p>Sometimes I might put a <strong style="color:#fff;">time constraint</strong> on this — sometimes not. If you're a person that likes to be in and out of the gym quickly I might give you a time limit so you don't spend too long on it.</p>
+
+        <p class="section-subtitle" style="color:var(--text);">Examples ⤵️</p>
+      </div>
+
+      <div class="examples-grid">
+        <div class="example-card">
+          <div class="example-label">"Build to a 1RM Back Squat"</div>
+          <div class="set-line">Build Set 1: 30kg × 5</div>
+          <div class="set-line">Build Set 2: 40kg × 3</div>
+          <div class="set-line">Build Set 3: 50kg × 3</div>
+          <div class="set-line">Build Set 4: 60kg × 2</div>
+          <div class="set-line">Build Set 5: 75kg × 1</div>
+          <div class="set-line">Build Set 6: 77.5kg × 1</div>
+          <div class="set-line working">Build Set 7: 80kg × 1 ⬅️ 1RM</div>
+          <div class="set-line" style="color:var(--red);">Final Set 8: 82.5kg × 0 ⬅️ Failed</div>
+        </div>
+        <div class="example-card">
+          <div class="example-label">"Take 10 minutes to find a 2RM Split Squat"</div>
+          <div class="set-line">Build Set 1: 20kg × 4/4</div>
+          <div class="set-line">Build Set 2: 25kg × 3/3</div>
+          <div class="set-line">Build Set 3: 30kg × 2/2</div>
+          <div class="set-line">Build Set 4: 32.5kg × 2/2</div>
+          <div class="set-line highlight">Build Set 5: 35kg × 2/2 🏆</div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>If you want to max out, you may end up trying a weight that you fail — which is 100% normal. We don't know where our ceiling is if we don't try for the big lifts!</span>
+      </div>
+      <div class="tip" style="margin-top: 0.5rem;">
+        <span class="tip-icon">💡</span>
+        <span>Sometimes you'll hit a weight and feel like 'yup, I don't have any more' — so you may choose to leave it there without trying to push for another one. It depends how you feel on the day!</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SECTION 5 — Back Off Sets ═══════════════ -->
+  <section class="section theme-purple" id="sec-5">
+    <div class="section-inner reveal">
+      <div class="section-label"><span class="label-emoji">🔙</span> Type 5</div>
+      <h2 class="section-title">Build to <span class="accent">X</span> RPE/RIR/RM<sup style="font-size:0.45em;vertical-align:super;opacity:0.7;font-style:italic;font-family:'Lato',sans-serif;font-weight:700;">(Rep Max)</sup> Then hit 1 back off set for max reps @ <span class="accent">Y</span>% of the top set's weight</h2>
+
+      <div class="section-body">
+        <p class="section-subtitle" style="color:var(--text);">Means ⤵️</p>
+        <p>Build up to a specific number of reps at a programmed intensity, or build to a rep max, then with the top weight, hit a back-off set at a percentage of that weight — and usually we take that all the way to failure.</p>
+        <p>This allows us to get <strong style="color:#fff;">more volume in at a lighter weight</strong> after we hit some heavy sets — therefore allowing us to progressively overload a movement more. Each week we can further that by using the back-off set to chase an extra rep or two.</p>
+        <p>We can also use back-off sets at the end of slow tempo work — to hit our fast-twitch muscle fibres after something slow and heavy.</p>
+
+        <p class="section-subtitle" style="color:var(--text);">Examples ⤵️</p>
+      </div>
+
+      <div class="examples-grid">
+        <div class="example-card">
+          <div class="example-label">"Build to RPE 9 @ 4 reps, then hit a max back off set @ 95% of your top set weight."</div>
+          <div class="set-line">Build Set 1: 40kg × 4</div>
+          <div class="set-line">Build Set 2: 50kg × 4</div>
+          <div class="set-line">Build Set 3: 60kg × 4</div>
+          <div class="set-line working">Build Set 4: 65kg × 4 ⬅️ RPE 9</div>
+          <div class="set-line highlight">Back Off Set: 62kg × Failure ⬅️ 95%</div>
+        </div>
+        <div class="example-card">
+          <div class="example-label">"Hit 4×5 @ 50kg, Tempo 3211, then hit a max back off set @ 80% Tempo 20×1"</div>
+          <div class="set-line">Set 1: 50kg × 5</div>
+          <div class="set-line">Set 2: 50kg × 5</div>
+          <div class="set-line">Set 3: 50kg × 5</div>
+          <div class="set-line">Set 4: 50kg × 5</div>
+          <div class="set-line highlight">Back Off Set: 40kg × Failure ⬅️ 80%</div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>To calculate a percentage, just do the percentage as a decimal multiplied by the weight. Example: 0.95 × 65kg = 61.75kg → round up to 62kg.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="footer" id="sec-footer">
+    <h2>And that's how you use build sets like a champ 💜</h2>
+    <p>Lift weights, do crime, etc.</p>
+    <button class="pill-button" onclick="window.scrollTo({top:0,behavior:'smooth'})">Back To The Top</button>
+  </footer>
+
+  <script>
+  // ── Side nav dots ──
+  const sections = document.querySelectorAll('.hero, .section, .footer');
+  const sideNav = document.getElementById('sideNav');
+  sections.forEach((sec, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'side-dot';
+    dot.setAttribute('aria-label', `Go to section ${i + 1}`);
+    dot.onclick = () => sec.scrollIntoView({ behavior: 'smooth' });
+    sideNav.appendChild(dot);
+  });
+  const dots = document.querySelectorAll('.side-dot');
+
+  // ── Scroll: progress bar, active dot, back-to-top, reveals ──
+  const progressBar = document.getElementById('progressBar');
+  const backToTop = document.getElementById('backToTop');
+  const reveals = document.querySelectorAll('.reveal');
+
+  function onScroll() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = progress + '%';
+
+    // Back to top
+    backToTop.classList.toggle('show', scrollTop > window.innerHeight);
+
+    // Active dot
+    let activeIndex = 0;
+    sections.forEach((sec, i) => {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.5) activeIndex = i;
+    });
+    dots.forEach((d, i) => d.classList.toggle('active', i === activeIndex));
+
+    // Reveal animations
+    reveals.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.85) {
+        el.classList.add('visible');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  </script>
+</body>
+</html>
